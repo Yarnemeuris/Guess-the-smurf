@@ -11,7 +11,8 @@ function celClicked(event) {
             break;
         case "cardSelectView":
             const cell = event.srcElement.parentElement;
-            ownCardIndx = cells.indexOf(cell);
+            ownCardIndx = cells.findIndex((checkCell) => {return cell.isEqualNode(checkCell);});
+            console.log(ownCardIndx);
             switchToView("homeView");
             setupOwnCard();
             break;
