@@ -1,0 +1,45 @@
+/*
+#messages>h3 {
+  margin: 10px;
+  color: lightgray;
+}*/
+
+
+.contentBox {
+  border: 3px solid rgb(100, 100, 100);
+  border-radius: 5px;
+  background-color: darkgray;
+}
+
+.view {
+  align-items: center;
+  display: flex;
+  background-color: rgb(64, 64, 64);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.hide {
+  display: none;
+}
+
+.card {
+  background-image: url(characters.webp);
+  width: 132px;
+  height: 179px;
+  background-size: 900px, 800px;
+  border: 5px solid rgb(100, 100, 100);
+  border-radius: 5px;
+}
+
+.emptyText {
+  color: darkgray;
+}
+
+.card.notIt {
+  filter: grayscale(100%);
+}
+
