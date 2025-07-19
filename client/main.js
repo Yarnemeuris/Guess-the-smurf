@@ -19,26 +19,34 @@ function celClicked(event) {
 
 }
 
-var cells = [];
-for (var y = 0; y < 4; y++) {
-    for (var x = 0; x < 6; x++) {
-        const cel = document.createElement("td");
-        const card = document.createElement("div");
-        card.style.backgroundPosition = "-" + (x * 145 + 25) + "px -" + (y * 195.5 + 18) + "px";
-        card.classList.add("card");
-        card.addEventListener("mousedown", celClicked);
-        cel.appendChild(card);
-        cells.push(cel);
+function createCells() {
+    var newCells = []
+    for (var y = 0; y < 4; y++) {
+        for (var x = 0; x < 6; x++) {
+            const cel = document.createElement("td");
+            const card = document.createElement("div");
+            card.style.backgroundPosition = "-" + (x * 145 + 25) + "px -" + (y * 195.5 + 18) + "px";
+            card.classList.add("card");
+            card.addEventListener("mousedown", celClicked);
+            cel.appendChild(card);
+            newCells.push(cel);
+        }
     }
+
+    return newCells;
 }
 
 function setupCells(id) {
-    document.getElementById(id).innerHTML = "";
+    const elment = document.getElementById(id)
+    elment.innerHTML = "";
+
+    const newCells = createCells();
 
     for (var i = 0; i < 3; i++) {
         const row = document.createElement("tr");
-        for (var i2 = 0; i2 < 8; i2++) row.appendChild(cells[i * 8 + i2]);
-        document.getElementById(id).appendChild(row);
+        for (var i2 = 0; i2 < 8; i2++) row.appendChild(newCells[i * 8 + i2]);
+        console.log(row);
+        elment.appendChild(row);
     }
 }
 
@@ -131,6 +139,8 @@ socket.on("chat message", (msg) => {
     addMessage(msg);
 })
 */
+
+var cells = createCells();
 
 switchToView("homeView");
 setupCells("game");
