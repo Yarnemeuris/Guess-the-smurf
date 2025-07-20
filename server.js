@@ -57,12 +57,12 @@ io.on('connection', (socket) => {
             var newRoom = new room(rooms.number);
             rooms.number++;
 
-            newRoom.addPlayer(socket, data.name, data.card);
+            newRoom.addPlayer(socket, data.card);
             rooms.notFull = newRoom;
             return;
         }
 
-        rooms.notFull.addPlayer(socket, data.name, data.card);
+        rooms.notFull.addPlayer(socket, data.card);
         rooms.fullRooms.push(rooms.notFull)
         rooms.notFull = undefined
     })

@@ -3,7 +3,9 @@ const socket = io();
 const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "smul smurf", "Smurf", "smurfin", "Speuder Smurf", "Vliegsmurf"];
 
 var ownCardIndx = 0;
-var name = "";
+var color = "";
+var opponentColor = "";
+
 
 function celClicked(event) {
     if (event.button != 0) return
@@ -23,7 +25,7 @@ function celClicked(event) {
 
 }
 
-function createCells() {
+function createCells(borderColor = "") {
     var newCells = []
     for (var y = 0; y < 3; y++) {
         for (var x = 0; x < 8; x++) {
@@ -32,6 +34,7 @@ function createCells() {
             const name = document.createElement("p");
 
             card.style.backgroundPosition = "-" + (x * 200) + "px -" + (y * 200) + "px";
+            if (borderColor != "") card.style.borderColor = borderColor;
             card.classList.add("card");
             card.addEventListener("mousedown", celClicked);
             name.innerText = smurfNames[y*8+x];
@@ -136,8 +139,15 @@ socket.on("waitForPlayer", () => {
     switchToView("waitView")
 })
 
-socket.on("startgame", () => {
+socket.on("startgame", (data) => {
+    color = data.color;
+    opponentColor = data.opponentColor;
+
     switchToView("gameView")
+
+    cells = createCells(color);
+    setupOwnCard();
+    setupCells("game");
 })
 
 addEventListenerFromID("cardSelect", "mousedown", () => { switchToView("cardSelectView"); })
@@ -162,9 +172,10 @@ addEventListenerFromID("chatInput", "focusin", focusOnInput);
 
 addEventListenerFromID("chatInput", "blur", blurInput);
 
-function addMessage(message) {
-    var elmt = document.createElement("h3");
+function addMessage(message, color) {
+    var elmt = document.createElement("p");
     elmt.innerHTML = message;
+    elmt.style.color = color
 
     const children = document.getElementById("messages").children;
     document.getElementById("messages").insertBefore(elmt, children[0]);

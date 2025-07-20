@@ -1,3 +1,6 @@
+const colors = ["green", "red"];
+const oppositeColor = { "green": "red", "red": "green" };
+
 module.exports = class room {
     constructor(number) {
         this.players = {}
@@ -6,7 +9,7 @@ module.exports = class room {
         this.roomName = "room" + number
     }
 
-    addPlayer(socket, name, card) {
+    addPlayer(socket, card) {
         if (Object.keys(this.players).length >= 2) return 0
 
         socket.join(this.roomName);
@@ -17,15 +20,15 @@ module.exports = class room {
             socket.to(this.roomName).emit('chat message', msg);
         });
 
-        this.players[name] = { "card": card, "socket": socket }
+        this.players[this.players[colors[0]] == undefined ? colors[0] : colors[1]] = { "card": card, "socket": socket }
 
         if (Object.keys(this.players).length === 2) this.#startGame();
     }
 
     #startGame() {
-        for (var playerName in this.players) {
-            var player = this.players[playerName]
-            player.socket.emit("startgame")
+        for (var color in this.players) {
+            var player = this.players[color]
+            player.socket.emit("startgame", { "color": color, "opponentColor": oppositeColor[color] })
         }
     }
 }
