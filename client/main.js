@@ -1,6 +1,6 @@
 const socket = io();
 
-const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "smul smurf", "smurfin", "Smurf", "Speuder Smurf", "Vliegsmurf"];
+const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "smul smurf", "Smurf", "smurfin", "Speuder Smurf", "Vliegsmurf"];
 
 var ownCardIndx = 0;
 var name = "";
