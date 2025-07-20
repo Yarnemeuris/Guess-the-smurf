@@ -1,5 +1,7 @@
 const socket = io();
 
+const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "smul smurf", "smurfin", "Smurf", "Speuder Smurf", "Vliegsmurf"];
+
 var ownCardIndx = 0;
 var name = "";
 
@@ -23,13 +25,18 @@ function celClicked(event) {
 
 function createCells() {
     var newCells = []
-    for (var y = 0; y < 4; y++) {
-        for (var x = 0; x < 6; x++) {
+    for (var y = 0; y < 3; y++) {
+        for (var x = 0; x < 8; x++) {
             const cel = document.createElement("td");
             const card = document.createElement("div");
-            card.style.backgroundPosition = "-" + (x * 145 + 25) + "px -" + (y * 195.5 + 18) + "px";
+            const name = document.createElement("p");
+
+            card.style.backgroundPosition = "-" + (x * 200) + "px -" + (y * 200) + "px";
             card.classList.add("card");
             card.addEventListener("mousedown", celClicked);
+            name.innerText = smurfNames[y*8+x];
+
+            card.appendChild(name);
             cel.appendChild(card);
             newCells.push(cel);
         }
@@ -43,11 +50,16 @@ function setupCells(id) {
     elment.innerHTML = "";
 
     const newCells = createCells();
+    const cellsPerRow = Math.floor((window.innerWidth - 240) / 200) - 1
 
-    for (var i = 0; i < 3; i++) {
-        const row = document.createElement("tr");
-        for (var i2 = 0; i2 < 8; i2++) row.appendChild(newCells[i * 8 + i2]);
+    var row = document.createElement("tr");
+    for (var i = 0; i < newCells.length; i++) {
+        row.appendChild(newCells[i]);
+
+        if (i % cellsPerRow !== cellsPerRow - 1 && i !== newCells.length - 1) continue;
+
         elment.appendChild(row);
+        row = document.createElement("tr");
     }
 }
 
@@ -55,6 +67,7 @@ function setCardToCell(card, cell) {
     const backgroundPos = cell.childNodes[0].style.backgroundPosition;
 
     card.style.backgroundPosition = backgroundPos;
+    card.innerHTML = cell.childNodes[0].innerHTML;
 }
 
 function setupOwnCard() {
@@ -159,6 +172,12 @@ function addMessage(message) {
 
 socket.on("chat message", (msg) => {
     addMessage(msg);
+})
+
+window.addEventListener("resize", () => {
+    console.log("resize")
+    setupCells("game");
+    setupCells("cardSelectTable");
 })
 
 var cells = createCells();

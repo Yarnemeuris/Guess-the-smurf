@@ -26,13 +26,23 @@
 }
 
 .card {
-  background-image: url(characters.webp);
-  width: 132px;
-  height: 179px;
-  background-size: 900px, 800px;
+  background-image: url(charecters.png);
+  width: 200px;
+  height: 200px;
+  background-size: 1600px, 600px;
   border: 5px solid rgb(100, 100, 100);
   border-radius: 5px;
   margin: auto;
+}
+
+.card>p {
+  font-family: sans-serif;
+  font-size: medium;
+  position: relative;
+  text-align: center;
+  top: calc(100% - 35px);
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  user-select: none;
 }
 
 .emptyText {
@@ -40,5 +50,5 @@
 }
 
 .card.notIt {
-  filter: grayscale(100%);
+  filter: grayscale(100%) opacity(50%);
 }
