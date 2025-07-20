@@ -26,7 +26,6 @@ module.exports = class room {
         for (var playerName in this.players) {
             var player = this.players[playerName]
             player.socket.emit("startgame")
-            console.log(player);
         }
     }
 }
