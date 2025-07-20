@@ -1,9 +1,8 @@
-/*
+
 #messages>h3 {
   margin: 10px;
-  color: lightgray;
-}*/
-
+  color: black;
+}
 
 .contentBox {
   border: 3px solid rgb(100, 100, 100);
@@ -33,6 +32,7 @@
   background-size: 900px, 800px;
   border: 5px solid rgb(100, 100, 100);
   border-radius: 5px;
+  margin: auto;
 }
 
 .emptyText {
@@ -42,4 +42,3 @@
 .card.notIt {
   filter: grayscale(100%);
 }
-

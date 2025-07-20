@@ -5,7 +5,11 @@ var url = require('url');
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const room = require("./server/room.js")
+
 server.listen(8080);
+
+var rooms = { number: 1, fullRooms: [] };
 
 function handler(req, res) {
     var q = url.parse(req.url, true);
@@ -36,7 +40,7 @@ function handler(req, res) {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 break;
             case "webp":
-                res.writeHead(200, { 'Content-Type': 'image/webp'});
+                res.writeHead(200, { 'Content-Type': 'image/webp' });
                 break;
             default:
                 res.writeHead(200);
@@ -48,7 +52,18 @@ function handler(req, res) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    socket.broadcast.emit('chat message', msg);
-  });
+    socket.on("joinGame", (data) => {
+        if (rooms.notFull === undefined) {
+            var newRoom = new room(rooms.number);
+            rooms.number++;
+
+            newRoom.addPlayer(socket, data.name, data.card);
+            rooms.notFull = newRoom;
+            return;
+        }
+
+        rooms.notFull.addPlayer(socket, data.name, data.card);
+        rooms.fullRooms.push(rooms.notFull)
+        rooms.notFull = undefined
+    })
 });

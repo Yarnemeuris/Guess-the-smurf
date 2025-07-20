@@ -1,6 +1,7 @@
 const socket = io();
 
 var ownCardIndx = 0;
+var name = "";
 
 function celClicked(event) {
     if (event.button != 0) return
@@ -11,8 +12,8 @@ function celClicked(event) {
             break;
         case "cardSelectView":
             const cell = event.srcElement.parentElement;
-            ownCardIndx = cells.findIndex((checkCell) => {return cell.isEqualNode(checkCell);});
-            console.log(ownCardIndx);
+            ownCardIndx = cells.findIndex((checkCell) => { return cell.isEqualNode(checkCell); });
+
             switchToView("homeView");
             setupOwnCard();
             break;
@@ -46,7 +47,6 @@ function setupCells(id) {
     for (var i = 0; i < 3; i++) {
         const row = document.createElement("tr");
         for (var i2 = 0; i2 < 8; i2++) row.appendChild(newCells[i * 8 + i2]);
-        console.log(row);
         elment.appendChild(row);
     }
 }
@@ -88,7 +88,13 @@ function getView() {
     }
 }
 
-document.getElementById("startGame").addEventListener("mouseup", () => { switchToView("gameView"); })
+document.getElementById("startGame").addEventListener("mouseup", () => {
+    if (name == "") return
+
+    switchToView("gameView");
+
+    socket.emit("joinGame", { "card": ownCardIndx, "name": name })
+})
 
 document.getElementById("cardSelect").addEventListener("mousedown", () => { switchToView("cardSelectView"); })
 
@@ -104,15 +110,16 @@ document.getElementById("nameInput").addEventListener("focusin", (event) => {
 document.getElementById("nameInput").addEventListener("blur", (event) => {
     const elment = event.target;
 
-    if (elment.value !== "") return;
+    if (elment.value !== "") {
+        name = elment.value
+        return;
+    }
 
     elment.classList.add("emptyText");
     elment.value = "name"
 })
 
-//code for chat function. Which I will fully implement later
-/* 
-document.querySelector("input#chatInput").addEventListener("keydown", (event) => {
+document.getElementById("chatInput").addEventListener("keydown", (event) => {
     if (event.key != "Enter") return;
 
     const value = document.querySelector("input#chatInput").value;
@@ -124,22 +131,38 @@ document.querySelector("input#chatInput").addEventListener("keydown", (event) =>
     document.querySelector("input#chatInput").value = "";
 })
 
+document.getElementById("chatInput").addEventListener("focusin", (event) => {
+    const elment = event.target;
+
+    if (elment.classList.contains("emptyText")) {
+        elment.value = "";
+        elment.classList.remove("emptyText");
+    }
+})
+
+document.getElementById("chatInput").addEventListener("blur", (event) => {
+    const elment = event.target;
+
+    if (elment.value !== "") {
+        name = elment.value
+        return;
+    }
+
+    elment.classList.add("emptyText");
+    elment.value = "message"
+})
+
 function addMessage(message) {
     var elmt = document.createElement("h3");
     elmt.innerHTML = message;
-    document.getElementById("messages").appendChild(elmt);
-
+    
     const children = document.getElementById("messages").children;
-    while (document.getElementById("messages").clientHeight - children[0].clientHeight > window.innerHeight) {
-        console.log(children[0]);
-        document.getElementById("messages").removeChild(children[0]);
-    }
+    document.getElementById("messages").insertBefore(elmt, children[0]);
 }
 
 socket.on("chat message", (msg) => {
     addMessage(msg);
 })
-*/
 
 var cells = createCells();
 
