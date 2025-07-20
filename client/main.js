@@ -116,9 +116,15 @@ function addEventListenerFromID(id, event, exec) {
 addEventListenerFromID("startGame", "mouseup", () => {
     if (name == "") return
 
-    switchToView("gameView");
-
     socket.emit("joinGame", { "card": ownCardIndx, "name": name })
+})
+
+socket.on("waitForPlayer", () => {
+    switchToView("waitView")
+})
+
+socket.on("startgame", () => {
+    switchToView("gameView")
 })
 
 addEventListenerFromID("cardSelect", "mousedown", () => { switchToView("cardSelectView"); })
