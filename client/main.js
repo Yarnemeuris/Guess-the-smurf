@@ -88,26 +88,16 @@ function getView() {
     }
 }
 
-document.getElementById("startGame").addEventListener("mouseup", () => {
-    if (name == "") return
-
-    switchToView("gameView");
-
-    socket.emit("joinGame", { "card": ownCardIndx, "name": name })
-})
-
-document.getElementById("cardSelect").addEventListener("mousedown", () => { switchToView("cardSelectView"); })
-
-document.getElementById("nameInput").addEventListener("focusin", (event) => {
+function focusOnInput(event) {
     const elment = event.target;
 
     if (elment.classList.contains("emptyText")) {
         elment.value = "";
         elment.classList.remove("emptyText");
     }
-})
+}
 
-document.getElementById("nameInput").addEventListener("blur", (event) => {
+function blurInput(event) {
     const elment = event.target;
 
     if (elment.value !== "") {
@@ -116,10 +106,28 @@ document.getElementById("nameInput").addEventListener("blur", (event) => {
     }
 
     elment.classList.add("emptyText");
-    elment.value = "name"
+    elment.value = elment.dataset.defaultvalue
+}
+
+function addEventListenerFromID(id, event, exec) {
+    document.getElementById(id).addEventListener(event, exec);
+}
+
+addEventListenerFromID("startGame", "mouseup", () => {
+    if (name == "") return
+
+    switchToView("gameView");
+
+    socket.emit("joinGame", { "card": ownCardIndx, "name": name })
 })
 
-document.getElementById("chatInput").addEventListener("keydown", (event) => {
+addEventListenerFromID("cardSelect", "mousedown", () => { switchToView("cardSelectView"); })
+
+addEventListenerFromID("nameInput", "focusin", focusOnInput);
+
+addEventListenerFromID("nameInput", "blur", blurInput)
+
+addEventListenerFromID("chatInput", "keydown", (event) => {
     if (event.key != "Enter") return;
 
     const value = document.querySelector("input#chatInput").value;
@@ -131,31 +139,14 @@ document.getElementById("chatInput").addEventListener("keydown", (event) => {
     document.querySelector("input#chatInput").value = "";
 })
 
-document.getElementById("chatInput").addEventListener("focusin", (event) => {
-    const elment = event.target;
+addEventListenerFromID("chatInput", "focusin", focusOnInput);
 
-    if (elment.classList.contains("emptyText")) {
-        elment.value = "";
-        elment.classList.remove("emptyText");
-    }
-})
-
-document.getElementById("chatInput").addEventListener("blur", (event) => {
-    const elment = event.target;
-
-    if (elment.value !== "") {
-        name = elment.value
-        return;
-    }
-
-    elment.classList.add("emptyText");
-    elment.value = "message"
-})
+addEventListenerFromID("chatInput", "blur", blurInput);
 
 function addMessage(message) {
     var elmt = document.createElement("h3");
     elmt.innerHTML = message;
-    
+
     const children = document.getElementById("messages").children;
     document.getElementById("messages").insertBefore(elmt, children[0]);
 }
