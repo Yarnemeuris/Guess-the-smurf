@@ -42,8 +42,17 @@ module.exports = class room {
     #startTurn() {
         this.io.to(this.roomName).emit("startTurn", { "turn": this.turn });
 
+        this.players[this.turn].socket.once('guessCard', (card) => {
+            this.players[this.turn].socket.removeAllListeners("question");
+
+            if (card != this.players[oppositeColor[this.turn]].card) this.#endTurn;
+
+            this.io.to(this.roomName).emit("gameEnd", { "won": this.turn, "greenCard": this.players.green.card, "redCard": this.players.red.card });
+        });
+
         this.players[this.turn].socket.once('question', (msg) => {
             this.players[oppositeColor[this.turn]].socket.emit('question', msg);
+            this.players[this.turn].socket.removeAllListeners("guessCard");
         });
 
         this.players[oppositeColor[this.turn]].socket.once('answer', (msg) => {

@@ -7,6 +7,7 @@ var color = "";
 var opponentColor = "";
 var yourTurn = false;
 var questionAsked = false;
+var onFinalCard = false;
 
 
 function amountDeselectedCards() {
@@ -15,7 +16,7 @@ function amountDeselectedCards() {
     var amount = 0
     for (var row of game.childNodes) {
         for (var cell of row.childNodes) {
-            amount += cell.childNodes[0].classList.contains("notIt");
+            amount += cell.firstChild.classList.contains("notIt");
         }
     }
 
@@ -28,7 +29,7 @@ function celClicked(event) {
     switch (getView()) {
         case "gameView":
             event.srcElement.classList.toggle("notIt");
-            if (amountDeselectedCards() == cells.length - 1) socket.emit("")
+            if (amountDeselectedCards() == cells.length - 1) onFinalCard = true
             break;
         case "cardSelectView":
             const cell = event.srcElement.parentElement;
@@ -83,12 +84,12 @@ function setupCells(id) {
 }
 
 function setCardToCell(card, cell) {
-    const backgroundPos = cell.childNodes[0].style.backgroundPosition;
-    const borderColor = cell.childNodes[0].style.borderColor;
+    const backgroundPos = cell.firstChild.style.backgroundPosition;
+    const borderColor = cell.firstChild.style.borderColor;
 
     card.style.backgroundPosition = backgroundPos;
     card.style.borderColor = borderColor;
-    card.innerHTML = cell.childNodes[0].innerHTML;
+    card.innerHTML = cell.firstChild.innerHTML;
 }
 
 function setupOwnCard() {
@@ -162,13 +163,12 @@ socket.on("startgame", (data) => {
 })
 
 socket.on("startTurn", (data) => {
-    console.log("new turn", data)
     yourTurn = data.turn == color;
 
     const turnAnimation = document.getElementById("turnAnimation")
     turnAnimation.children[0].innerText = (yourTurn ? "your" : opponentColor + "'s") + " turn"
     turnAnimation.classList.add("turnAnimation")
-    addEventListenerFromID("turnAnimation", "animationend", () => {turnAnimation.classList.remove("turnAnimation")})
+    addEventListenerFromID("turnAnimation", "animationend", () => { turnAnimation.classList.remove("turnAnimation") })
 
     questionAsked = false;
     setMessageOptions();
@@ -206,37 +206,75 @@ function addMessage(message, color) {
 }
 
 function setMessageOptions() {
+    document.getElementById("chatInput").classList.add("hide");
+    document.getElementById("endTurnButton").classList.add("hide");
+    document.getElementById("answerButtons").classList.add("hide");
+    document.getElementById("guessCardButton").classList.add("hide");
+
     if (yourTurn && questionAsked) {
-        document.getElementById("chatInput").classList.add("hide");
         document.getElementById("endTurnButton").classList.remove("hide");
-        document.getElementById("answerButtons").classList.add("hide");
         return;
     }
 
-    if (yourTurn && !questionAsked) {
+    if (yourTurn && !questionAsked && !onFinalCard) {
         document.getElementById("chatInput").classList.remove("hide");
-        document.getElementById("endTurnButton").classList.add("hide");
-        document.getElementById("answerButtons").classList.add("hide");
+        return;
+    }
+
+    if (yourTurn && !questionAsked && onFinalCard) {
+        document.getElementById("guessCardButton").classList.remove("hide");
         return;
     }
 
     if (!yourTurn && questionAsked) {
-        document.getElementById("chatInput").classList.add("hide");
-        document.getElementById("endTurnButton").classList.add("hide");
         document.getElementById("answerButtons").classList.remove("hide");
-        return;
-    }
-
-    if (!yourTurn && !questionAsked) {
-        document.getElementById("chatInput").classList.add("hide");
-        document.getElementById("endTurnButton").classList.add("hide");
-        document.getElementById("answerButtons").classList.add("hide");
         return;
     }
 }
 
 addEventListenerFromID("endTurnButton", "click", () => {
-    socket.emit("endTurn", "");
+    socket.emit("endTurn");
+})
+
+socket.on("gameEnd", (data) => {
+    if (data.won != undefined) {
+        const youWon = data.won == color;
+
+        document.getElementById("resualtText").innerText = "you " + (youWon ? "won" : "lost");
+        
+        const greenCard = document.createElement("div");
+        greenCard.classList.add("card");
+        setCardToCell(greenCard, cells[data.greenCard]);
+        greenCard.style.borderColor = "green";
+        document.getElementById("showCards").appendChild(greenCard);
+        
+        const redCard = document.createElement("div");
+        redCard.classList.add("card");
+        setCardToCell(redCard, cells[data.redCard]);
+        redCard.style.borderColor = "red";
+        document.getElementById("showCards").appendChild(redCard);
+
+        switchToView("endView")
+    }
+})
+
+addEventListenerFromID("guessCardButton", "click", () => {
+    var cardGuess = ""
+    for (var row of document.getElementById("game").childNodes) {
+        for (var cell of row.childNodes) {
+            if (cell.firstChild.classList.contains("notIt")) {
+                cardGuess = cell.firstChild.firstChild.innerText;
+                break;
+            }
+        }
+        if (cardGuess !== "") break;
+    }
+    
+    cardGuess = smurfNames.indexOf(cardGuess) - 1;
+    
+    if (cardGuess === -1) return;
+
+    socket.emit("guessCard", cardGuess);
 })
 
 addEventListenerFromID("yesButton", "click", answer);
@@ -246,7 +284,7 @@ function answer(event) {
     const value = event.srcElement.value
     socket.emit("answer", value);
     addMessage(value, color);
-
+    
     document.getElementById("answerButtons").classList.add("hide");
 }
 
@@ -257,7 +295,7 @@ socket.on("answer", (msg) => {
 
 socket.on("question", (msg) => {
     addMessage(msg, opponentColor);
-
+    
     questionAsked = true;
     setMessageOptions();
 })

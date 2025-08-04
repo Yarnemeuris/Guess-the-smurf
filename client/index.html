@@ -22,6 +22,7 @@
                         class="emptyText hide" autocomplete="off"
                         style="width: 100%; height: 100%; box-sizing: border-box; border: 3px solid rgb(100, 100, 100); border-radius: 5px; background-color: white; font-family: sans-serif;">
                     <input type="button" id="endTurnButton" value="end turn" class="button hide">
+                    <input type="button" id="guessCardButton" value="guess the card" class="button hide">
                     <div id="answerButtons" style="width: 100%; height: 100%;" class="hide">
                         <input type="button" class="button" style="width: calc(50% - 2.5px);" id="yesButton" value="yes">
                         <input type="button" class="button" style="width: calc(50% - 2.5px);" id="noButton" value="no">
@@ -44,7 +45,7 @@
     <div id="homeView" class="view">
         <div class="contentBox" style="margin: auto;">
             <p style="margin-top: 5px; margin-bottom: 10px;">Choose a card:</p>
-            <div id="cardSelect" style="width: 200px; height: 200px; margin: 5px; margin-top: 10px; cursor: pointer;"
+            <div id="cardSelect" style="margin: 5px; margin-top: 10px; cursor: pointer;"
                 class="card">
             </div>
             <div style="margin: auto; margin-top: 10px; margin-bottom: 5px; width: 100px;">
@@ -56,6 +57,13 @@
     <div id="cardSelectView" class="view" style="overflow: auto;">
         <div class="contentBox" style="margin: auto;">
             <table id="cardSelectTable"></table>
+        </div>
+    </div>
+
+    <div id="endView" class="view">
+        <div class="contentBox" style="margin: auto;">
+            <p style="font-size: xx-large; margin-top: 5px; margin-bottom: 0px;" id="resualtText" ></p>
+            <div id="showCards" style="width: 435px; margin-left: 5px; margin-right: 5px; height: 215px; margin-top: 5px; display: flex;"></div>
         </div>
     </div>
 
