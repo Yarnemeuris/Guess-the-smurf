@@ -1,11 +1,26 @@
 const socket = io();
 
-const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "smul smurf", "Smurf", "smurfin", "Speuder Smurf", "Vliegsmurf"];
+const smurfNames = ["Boeren Smurf", "Bolle Gijs", "Bril Smurf", "Chloorhydris", "Droom Smurf", "Eenzame Smurf", "Gargamel", "Gnoef", "Greintje", "Grote Smurf", "Hippe Smurf", "Kleermaker Smurf", "Laconia", "Lol Smurf", "Marco Smurf", "Natuur Smurf", "Puppie", "Robot Smurf", "Schilder Smurf", "Smul Smurf", "Smurf", "Smurfin", "Speuder Smurf", "Vlieg Smurf"];
 
 var ownCardIndx = 0;
 var color = "";
 var opponentColor = "";
+var yourTurn = false;
+var questionAsked = false;
 
+
+function amountDeselectedCards() {
+    const game = document.getElementById("game");
+
+    var amount = 0
+    for (var row of game.childNodes) {
+        for (var cell of row.childNodes) {
+            amount += cell.childNodes[0].classList.contains("notIt");
+        }
+    }
+
+    return amount
+}
 
 function celClicked(event) {
     if (event.button != 0) return
@@ -13,6 +28,7 @@ function celClicked(event) {
     switch (getView()) {
         case "gameView":
             event.srcElement.classList.toggle("notIt");
+            if (amountDeselectedCards() == cells.length - 1) socket.emit("")
             break;
         case "cardSelectView":
             const cell = event.srcElement.parentElement;
@@ -37,7 +53,7 @@ function createCells(borderColor = "") {
             if (borderColor != "") card.style.borderColor = borderColor;
             card.classList.add("card");
             card.addEventListener("mousedown", celClicked);
-            name.innerText = smurfNames[y*8+x];
+            name.innerText = smurfNames[y * 8 + x];
 
             card.appendChild(name);
             cel.appendChild(card);
@@ -52,7 +68,7 @@ function setupCells(id) {
     const elment = document.getElementById(id)
     elment.innerHTML = "";
 
-    const newCells = createCells();
+    const newCells = createCells(color);
     const cellsPerRow = Math.floor((window.innerWidth - 240) / 200) - 1
 
     var row = document.createElement("tr");
@@ -68,8 +84,10 @@ function setupCells(id) {
 
 function setCardToCell(card, cell) {
     const backgroundPos = cell.childNodes[0].style.backgroundPosition;
+    const borderColor = cell.childNodes[0].style.borderColor;
 
     card.style.backgroundPosition = backgroundPos;
+    card.style.borderColor = borderColor;
     card.innerHTML = cell.childNodes[0].innerHTML;
 }
 
@@ -116,11 +134,6 @@ function focusOnInput(event) {
 function blurInput(event) {
     const elment = event.target;
 
-    if (elment.value !== "") {
-        name = elment.value
-        return;
-    }
-
     elment.classList.add("emptyText");
     elment.value = elment.dataset.defaultvalue
 }
@@ -130,9 +143,7 @@ function addEventListenerFromID(id, event, exec) {
 }
 
 addEventListenerFromID("startGame", "mouseup", () => {
-    if (name == "") return
-
-    socket.emit("joinGame", { "card": ownCardIndx, "name": name })
+    socket.emit("joinGame", { "card": ownCardIndx })
 })
 
 socket.on("waitForPlayer", () => {
@@ -150,20 +161,33 @@ socket.on("startgame", (data) => {
     setupCells("game");
 })
 
+socket.on("startTurn", (data) => {
+    console.log("new turn", data)
+    yourTurn = data.turn == color;
+
+    const turnAnimation = document.getElementById("turnAnimation")
+    turnAnimation.children[0].innerText = (yourTurn ? "your" : opponentColor + "'s") + " turn"
+    turnAnimation.classList.add("turnAnimation")
+    addEventListenerFromID("turnAnimation", "animationend", () => {turnAnimation.classList.remove("turnAnimation")})
+
+    questionAsked = false;
+    setMessageOptions();
+})
+
 addEventListenerFromID("cardSelect", "mousedown", () => { switchToView("cardSelectView"); })
-
-addEventListenerFromID("nameInput", "focusin", focusOnInput);
-
-addEventListenerFromID("nameInput", "blur", blurInput)
 
 addEventListenerFromID("chatInput", "keydown", (event) => {
     if (event.key != "Enter") return;
+    if (!yourTurn) return;
 
     const value = document.querySelector("input#chatInput").value;
     if (value == "") return;
 
-    socket.emit('chat message', value);
-    addMessage(value);
+    socket.emit('question', value);
+    addMessage(value, color);
+
+    questionAsked = true;
+    document.getElementById("chatInput").classList.add("hide");
 
     document.querySelector("input#chatInput").value = "";
 })
@@ -181,12 +205,64 @@ function addMessage(message, color) {
     document.getElementById("messages").insertBefore(elmt, children[0]);
 }
 
-socket.on("chat message", (msg) => {
-    addMessage(msg);
+function setMessageOptions() {
+    if (yourTurn && questionAsked) {
+        document.getElementById("chatInput").classList.add("hide");
+        document.getElementById("endTurnButton").classList.remove("hide");
+        document.getElementById("answerButtons").classList.add("hide");
+        return;
+    }
+
+    if (yourTurn && !questionAsked) {
+        document.getElementById("chatInput").classList.remove("hide");
+        document.getElementById("endTurnButton").classList.add("hide");
+        document.getElementById("answerButtons").classList.add("hide");
+        return;
+    }
+
+    if (!yourTurn && questionAsked) {
+        document.getElementById("chatInput").classList.add("hide");
+        document.getElementById("endTurnButton").classList.add("hide");
+        document.getElementById("answerButtons").classList.remove("hide");
+        return;
+    }
+
+    if (!yourTurn && !questionAsked) {
+        document.getElementById("chatInput").classList.add("hide");
+        document.getElementById("endTurnButton").classList.add("hide");
+        document.getElementById("answerButtons").classList.add("hide");
+        return;
+    }
+}
+
+addEventListenerFromID("endTurnButton", "click", () => {
+    socket.emit("endTurn", "");
+})
+
+addEventListenerFromID("yesButton", "click", answer);
+addEventListenerFromID("noButton", "click", answer);
+
+function answer(event) {
+    const value = event.srcElement.value
+    socket.emit("answer", value);
+    addMessage(value, color);
+
+    document.getElementById("answerButtons").classList.add("hide");
+}
+
+socket.on("answer", (msg) => {
+    addMessage(msg, opponentColor);
+    setMessageOptions();
+});
+
+socket.on("question", (msg) => {
+    addMessage(msg, opponentColor);
+
+    questionAsked = true;
+    setMessageOptions();
 })
 
 window.addEventListener("resize", () => {
-    console.log("resize")
     setupCells("game");
     setupCells("cardSelectTable");
 })

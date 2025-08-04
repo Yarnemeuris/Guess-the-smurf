@@ -54,7 +54,7 @@ function handler(req, res) {
 io.on('connection', (socket) => {
     socket.on("joinGame", (data) => {
         if (rooms.notFull === undefined) {
-            var newRoom = new room(rooms.number);
+            var newRoom = new room(rooms.number, io);
             rooms.number++;
 
             newRoom.addPlayer(socket, data.card);

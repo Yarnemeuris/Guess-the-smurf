@@ -2,11 +2,14 @@ const colors = ["green", "red"];
 const oppositeColor = { "green": "red", "red": "green" };
 
 module.exports = class room {
-    constructor(number) {
-        this.players = {}
+    constructor(number, io) {
+        this.players = {};
+        this.turn = colors[0];
 
-        this.number = number
-        this.roomName = "room" + number
+        this.number = number;
+        this.roomName = "room" + number;
+
+        this.io = io;
     }
 
     addPlayer(socket, card) {
@@ -15,10 +18,6 @@ module.exports = class room {
         socket.join(this.roomName);
 
         socket.emit("waitForPlayer");
-
-        socket.on('chat message', (msg) => {
-            socket.to(this.roomName).emit('chat message', msg);
-        });
 
         this.players[this.players[colors[0]] == undefined ? colors[0] : colors[1]] = { "card": card, "socket": socket }
 
@@ -30,5 +29,27 @@ module.exports = class room {
             var player = this.players[color]
             player.socket.emit("startgame", { "color": color, "opponentColor": oppositeColor[color] })
         }
+
+        this.#startTurn();
+    }
+
+    #endTurn() {
+        this.turn = oppositeColor[this.turn];
+
+        this.#startTurn();
+    }
+
+    #startTurn() {
+        this.io.to(this.roomName).emit("startTurn", { "turn": this.turn });
+
+        this.players[this.turn].socket.once('question', (msg) => {
+            this.players[oppositeColor[this.turn]].socket.emit('question', msg);
+        });
+
+        this.players[oppositeColor[this.turn]].socket.once('answer', (msg) => {
+            this.players[this.turn].socket.emit('answer', msg);
+
+            this.players[this.turn].socket.once("endTurn", () => { this.#endTurn() });
+        });
     }
 }

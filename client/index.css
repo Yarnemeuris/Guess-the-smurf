@@ -22,6 +22,18 @@
   left: 0px;
 }
 
+.transpartentView {
+  align-items: center;
+  display: flex;
+  background-color: #0000;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  pointer-events: none;
+}
+
 .hide {
   display: none;
 }
@@ -55,4 +67,36 @@ p {
 
 .card.notIt {
   filter: grayscale(100%) opacity(50%);
+}
+
+@keyframes showTurnAnimation {
+  0% {
+    right: 100%;
+  }
+
+  40% {
+    right: 0%;
+  }
+
+  60% {
+    right: 0%;
+  }
+
+  100% {
+    right: -100%;
+  }
+}
+
+.turnAnimation {
+  animation: 5s ease-in-out 0s showTurnAnimation;
+}
+
+.button {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: lightgray;
+  border: 2px solid rgb(100, 100, 100);
+  border-radius: 5px;
+  cursor: pointer;
 }
