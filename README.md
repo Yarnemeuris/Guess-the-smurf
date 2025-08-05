@@ -4,8 +4,10 @@ A remake of the game Guess who with smurfs in the browser. Made with node js, so
 ## current features
 - Start a game.
 - Toggle which cards you think can/can't be the one you're opponent has.
-- Ask and answer questions via the chat function.
 - Join games with random people.
+- Ask and answer questions via the chat function.
+- Guess if the final card is right.
+- Win or lose.
 
 ## why smurfes
 When deciding on the theme I wanted for the game, I chose the Smurfs for a couple of reasons.
