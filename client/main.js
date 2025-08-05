@@ -236,18 +236,27 @@ addEventListenerFromID("endTurnButton", "click", () => {
     socket.emit("endTurn");
 })
 
+function onDisconnect() {
+    document.getElementById("resualtText").innerText = "Game ended from disconnection.";
+    document.getElementById("showCards").style.display = "none";
+
+    switchToView("endView")
+}
+
+socket.on("disconnect", onDisconnect)
+
 socket.on("gameEnd", (data) => {
     if (data.won != undefined) {
         const youWon = data.won == color;
 
         document.getElementById("resualtText").innerText = "you " + (youWon ? "won" : "lost");
-        
+
         const greenCard = document.createElement("div");
         greenCard.classList.add("card");
         setCardToCell(greenCard, cells[data.greenCard]);
         greenCard.style.borderColor = "green";
         document.getElementById("showCards").appendChild(greenCard);
-        
+
         const redCard = document.createElement("div");
         redCard.classList.add("card");
         setCardToCell(redCard, cells[data.redCard]);
@@ -255,6 +264,10 @@ socket.on("gameEnd", (data) => {
         document.getElementById("showCards").appendChild(redCard);
 
         switchToView("endView")
+    }
+
+    if (data.error === "disconnect") {
+        onDisconnect();
     }
 })
 
@@ -269,9 +282,9 @@ addEventListenerFromID("guessCardButton", "click", () => {
         }
         if (cardGuess !== "") break;
     }
-    
+
     cardGuess = smurfNames.indexOf(cardGuess) - 1;
-    
+
     if (cardGuess === -1) return;
 
     socket.emit("guessCard", cardGuess);
@@ -284,7 +297,7 @@ function answer(event) {
     const value = event.srcElement.value
     socket.emit("answer", value);
     addMessage(value, color);
-    
+
     document.getElementById("answerButtons").classList.add("hide");
 }
 
@@ -295,7 +308,7 @@ socket.on("answer", (msg) => {
 
 socket.on("question", (msg) => {
     addMessage(msg, opponentColor);
-    
+
     questionAsked = true;
     setMessageOptions();
 })

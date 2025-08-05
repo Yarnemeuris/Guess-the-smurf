@@ -58,11 +58,14 @@ io.on('connection', (socket) => {
             rooms.number++;
 
             newRoom.addPlayer(socket, data.card);
+            newRoom.killFunction = () => {rooms.notFull = undefined;}
+            
             rooms.notFull = newRoom;
             return;
         }
-
+        
         rooms.notFull.addPlayer(socket, data.card);
+        rooms.notFull.killFunction = () => {rooms.fullRooms.splice(rooms.fullRooms.indexOf(this))}
         rooms.fullRooms.push(rooms.notFull)
         rooms.notFull = undefined
     })
