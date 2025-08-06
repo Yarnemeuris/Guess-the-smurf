@@ -17,9 +17,7 @@ var rooms = { number: 1, fullRooms: [] };
 function handler(req, res) {
     var q = url.parse(req.url, true);
 
-    if (q.pathname == "/version") { res.writeHead(200); res.write(String(change)); return res.end() }
-
-    var path = q.pathname == '/' ? './client/index.html' : './client' + q.pathname;
+    var path = q.pathname == '/guess-the-smurf' ? './client/index.html' : './client' + q.pathname.split("/guess-the-smurf").pop();
     fs.readFile(path, function (err, data) {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/html' });
