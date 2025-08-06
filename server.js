@@ -20,32 +20,12 @@ function handler(req, res) {
     fs.readFile(path, function (err, data) {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/html' });
-            //console.log(err)
             return res.end("404 Not Found");
         }
-        switch (path.split(".")[1]) {
-            case "html":
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                break;
-            case "css":
-                res.writeHead(200, { 'Content-Type': 'text/css' });
-                break;
-            case "js":
-                res.writeHead(200, { 'Content-Type': 'text/javascript' });
-                break;
-            case "png":
-                res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-                break;
-            case "txt":
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                break;
-            case "webp":
-                res.writeHead(200, { 'Content-Type': 'image/webp' });
-                break;
-            default:
-                res.writeHead(200);
-                console.log(path.split(".")[1]);
-        }
+
+        res.setHeader('Content-Type', getContentType(path))
+        res.setHeader('Cache-Control', 'punlib, max-age=86400')
+        res.writeHead(200);
         res.write(data);
         return res.end();
     });
@@ -58,14 +38,14 @@ io.on('connection', (socket) => {
             rooms.number++;
 
             newRoom.addPlayer(socket, data.card);
-            newRoom.killFunction = () => {rooms.notFull = undefined;}
-            
+            newRoom.killFunction = () => { rooms.notFull = undefined; }
+
             rooms.notFull = newRoom;
             return;
         }
-        
+
         rooms.notFull.addPlayer(socket, data.card);
-        rooms.notFull.killFunction = () => {rooms.fullRooms.splice(rooms.fullRooms.indexOf(this))}
+        rooms.notFull.killFunction = () => { rooms.fullRooms.splice(rooms.fullRooms.indexOf(this)) }
         rooms.fullRooms.push(rooms.notFull)
         rooms.notFull = undefined
     })
