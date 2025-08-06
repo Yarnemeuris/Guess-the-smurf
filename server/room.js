@@ -1,7 +1,7 @@
 const colors = ["green", "red"];
 const oppositeColor = { "green": "red", "red": "green" };
 
-module.exports = class room {
+export class room {
     constructor(number, io) {
         this.players = {};
         this.turn = colors[0];

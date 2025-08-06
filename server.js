@@ -1,11 +1,14 @@
-var server = require("http").createServer(handler);
-var fs = require('fs');
-var url = require('url');
+import { createServer } from 'http';
+var server = createServer(handler);
 
-const { Server } = require("socket.io");
+import fs from 'fs';
+import url from 'url';
+import mime from 'mime';
+
+import { Server } from "socket.io";
 const io = new Server(server);
 
-const room = require("./server/room.js")
+import { room } from "./server/room.js";
 
 server.listen(8080);
 
@@ -16,14 +19,14 @@ function handler(req, res) {
 
     if (q.pathname == "/version") { res.writeHead(200); res.write(String(change)); return res.end() }
 
-    var path = q.pathname == '/' ? __dirname + '/client/index.html' : __dirname + '/client' + q.pathname;
+    var path = q.pathname == '/' ? './client/index.html' : './client' + q.pathname;
     fs.readFile(path, function (err, data) {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/html' });
             return res.end("404 Not Found");
         }
 
-        res.setHeader('Content-Type', getContentType(path))
+        res.setHeader('Content-Type', mime.getType(path))
         res.setHeader('Cache-Control', 'punlib, max-age=86400')
         res.writeHead(200);
         res.write(data);
